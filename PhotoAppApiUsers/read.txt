@@ -1,0 +1,4 @@
+mvn spring-boot:run -Dspring-boot.run.arguments=--spring.application.instance_id=sergey
+
+In a newer version, wrap arguments with double quotes and separate them with a space
+-Dspring-boot.run.arguments="--spring.application.instance_id=sergey2 --server.port=8999"

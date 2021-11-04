@@ -7,7 +7,7 @@ import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
 
 @SpringBootApplication
 @EnableEurekaClient
-@EnableZuulProxy
+@EnableZuulProxy//his will enable our application to work as a ZUUL API gateway.
 public class PhotoAppApiZuulApiGatewayApplication {
 
 	public static void main(String[] args) {
