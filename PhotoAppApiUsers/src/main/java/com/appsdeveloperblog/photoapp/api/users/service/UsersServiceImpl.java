@@ -29,17 +29,17 @@ import com.appsdeveloperblog.photoapp.api.users.data.*;
 
 @Service
 public class UsersServiceImpl implements UsersService {
-	
+
 	UsersRepository usersRepository;
 	BCryptPasswordEncoder bCryptPasswordEncoder;
 	//RestTemplate restTemplate;
 	Environment environment;
 	AlbumsServiceClient albumsServiceClient;
-	
+
 	Logger logger = LoggerFactory.getLogger(this.getClass());
-	
+
 	@Autowired
-	public UsersServiceImpl(UsersRepository usersRepository, 
+	public UsersServiceImpl(UsersRepository usersRepository,
 			BCryptPasswordEncoder bCryptPasswordEncoder,
 			AlbumsServiceClient albumsServiceClient,
 			Environment environment)
@@ -49,71 +49,76 @@ public class UsersServiceImpl implements UsersService {
 		this.albumsServiceClient = albumsServiceClient;
 		this.environment = environment;
 	}
- 
+
 	@Override
 	public UserDto createUser(UserDto userDetails) {
 		// TODO Auto-generated method stub
-		
-		userDetails.setUserId(UUID.randomUUID().toString());
+
+		//Universally Unique Identifier and we can use it to generate a random value.
+		userDetails.setUserId(UUID.randomUUID().toString());//It's going to be a random alphanumeric string of characters that can be used as an ID.
 		userDetails.setEncryptedPassword(bCryptPasswordEncoder.encode(userDetails.getPassword()));
-		
-		ModelMapper modelMapper = new ModelMapper(); 
+
+		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-		
+
 		UserEntity userEntity = modelMapper.map(userDetails, UserEntity.class);
 
 		usersRepository.save(userEntity);
-		
+
 		UserDto returnValue = modelMapper.map(userEntity, UserDto.class);
- 
+
 		return returnValue;
 	}
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		UserEntity userEntity = usersRepository.findByEmail(username);
-		
-		if(userEntity == null) throw new UsernameNotFoundException(username);	
-		
+
+		if(userEntity == null) throw new UsernameNotFoundException(username);
+
+		//enabled can be set to false until user verifies their email address
+		//if set to false then the user will not be able to login
+
+		//the last one is the list of authorities.I'm not using list of authority, so I will provide an empty list.
 		return new User(userEntity.getEmail(), userEntity.getEncryptedPassword(), true, true, true, true, new ArrayList<>());
 	}
 
 	@Override
-	public UserDto getUserDetailsByEmail(String email) { 
+	public UserDto getUserDetailsByEmail(String email) {
 		UserEntity userEntity = usersRepository.findByEmail(email);
-		
+
 		if(userEntity == null) throw new UsernameNotFoundException(email);
-		
-		
+
+
 		return new ModelMapper().map(userEntity, UserDto.class);
 	}
 
 	@Override
 	public UserDto getUserByUserId(String userId) {
-		
-        UserEntity userEntity = usersRepository.findByUserId(userId);     
+
+        UserEntity userEntity = usersRepository.findByUserId(userId);
         if(userEntity == null) throw new UsernameNotFoundException("User not found");
-        
+
         UserDto userDto = new ModelMapper().map(userEntity, UserDto.class);
-        
+
         /*
         String albumsUrl = String.format(environment.getProperty("albums.url"), userId);
-        
+
         ResponseEntity<List<AlbumResponseModel>> albumsListResponse = restTemplate.exchange(albumsUrl, HttpMethod.GET, null, new ParameterizedTypeReference<List<AlbumResponseModel>>() {
         });
-        List<AlbumResponseModel> albumsList = albumsListResponse.getBody(); 
+        List<AlbumResponseModel> albumsList = albumsListResponse.getBody();
         */
-        
+
         logger.info("Before calling albums Microservice");
         List<AlbumResponseModel> albumsList = albumsServiceClient.getAlbums(userId);
         logger.info("After calling albums Microservice");
-        
+
 		userDto.setAlbums(albumsList);
-		
+
 		return userDto;
 	}
-	
-	
-	
+
+
+
 
 }

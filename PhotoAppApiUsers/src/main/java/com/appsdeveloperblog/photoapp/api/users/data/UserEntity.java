@@ -9,32 +9,32 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-@Table(name="users")
+@Table(name="users")//database table
 public class UserEntity implements Serializable {
 
- 
 	private static final long serialVersionUID = -2731425678149216053L;
-	
-	@Id
-	@GeneratedValue
+
+	@Id//to specify that this field is going to be a database id
+	@GeneratedValue //this field will also be an auto generated value,It will start with one.
 	private long id;
-	
+
 	@Column(nullable=false, length=50)
 	private String firstName;
-	
+
 	@Column(nullable=false, length=50)
 	private String lastName;
-	
-	@Column(nullable=false, length=120, unique=true)
+
+	@Column(nullable=false, length=250, unique=true)
 	private String email;
-	
+
+	// is a public user ID, which we are going to use in our HTTP requests and it's going to be an alphanumeric value.
 	@Column(nullable=false, unique=true)
 	private String userId;
-	
-	@Column(nullable=false, unique=true)	
+
+	@Column(nullable=false, unique=true)
 	private String encryptedPassword;
-	
-	
+
+
 	public long getId() {
 		return id;
 	}
@@ -71,7 +71,7 @@ public class UserEntity implements Serializable {
 	public void setEncryptedPassword(String encryptedPassword) {
 		this.encryptedPassword = encryptedPassword;
 	}
-	
-	
+
+
 
 }

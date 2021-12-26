@@ -24,10 +24,12 @@ import com.appsdeveloperblog.photoapp.api.users.shared.*;
 @RestController
 @RequestMapping("/users")
 public class UsersController {
-	
+
+	//I need this object so that I can read from the environment the port number on which this micro service is running.
+	//I will use this environment object to access the local server port number
 	@Autowired
 	private Environment env;
-	
+
 	@Autowired
 	UsersService usersService;
 
@@ -36,33 +38,38 @@ public class UsersController {
 	{
 		return "Working on port " + env.getProperty("local.server.port") + ", with token = " + env.getProperty("token.secret");
 	}
- 
+
+	//adding support to accept and return JSON or XML depending on what is set in the headers of the request
+	//Content-Type: application/json
+	//Accept: application/xml
 	@PostMapping(
 			consumes = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE },
 			produces = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE }
 			)
 	public ResponseEntity<CreateUserResponseModel> createUser(@RequestBody CreateUserRequestModel userDetails)
 	{
-		ModelMapper modelMapper = new ModelMapper(); 
+		ModelMapper modelMapper = new ModelMapper();
 		modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
-		
+
 		UserDto userDto = modelMapper.map(userDetails, UserDto.class);
-		
+
 		UserDto createdUser = usersService.createUser(userDto);
-		
+
 		CreateUserResponseModel returnValue = modelMapper.map(createdUser, CreateUserResponseModel.class);
-		
-		return ResponseEntity.status(HttpStatus.CREATED).body(returnValue);
+
+		return ResponseEntity
+				.status(HttpStatus.CREATED)
+				.body(returnValue);
 	}
-	
+
     @GetMapping(value="/{userId}", produces = { MediaType.APPLICATION_XML_VALUE, MediaType.APPLICATION_JSON_VALUE })
     public ResponseEntity<UserResponseModel> getUser(@PathVariable("userId") String userId) {
-       
-        UserDto userDto = usersService.getUserByUserId(userId); 
+
+        UserDto userDto = usersService.getUserByUserId(userId);
         UserResponseModel returnValue = new ModelMapper().map(userDto, UserResponseModel.class);
-        
+
         return ResponseEntity.status(HttpStatus.OK).body(returnValue);
     }
-	
-	
+
+
 }
